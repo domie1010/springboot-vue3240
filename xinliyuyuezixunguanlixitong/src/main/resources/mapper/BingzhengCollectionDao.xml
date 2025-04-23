@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.BingzhengCollectionDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.bingzheng_id as bingzhengId
+        ,a.yonghu_id as yonghuId
+        ,a.bingzheng_collection_types as bingzhengCollectionTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.BingzhengCollectionView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,bingzheng.bingzheng_name as bingzhengName
+        ,bingzheng.bingzheng_uuid_number as bingzhengUuidNumber
+        ,bingzheng.bingzheng_photo as bingzhengPhoto
+        ,bingzheng.bingzheng_types as bingzhengTypes
+        ,bingzheng.bingzheng_zhengzhuang as bingzhengZhengzhuang
+        ,bingzheng.bingzheng_content as bingzhengContent
+        ,bingzheng.shangxia_types as shangxiaTypes
+        ,bingzheng.bingzheng_delete as bingzhengDelete
+        ,yonghu.yonghu_uuid_number as yonghuUuidNumber
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.new_money as newMoney
+
+        FROM bingzheng_collection  a
+        left JOIN bingzheng bingzheng ON a.bingzheng_id = bingzheng.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.bingzhengId != null and params.bingzhengId != ''">
+                and (
+                    a.bingzheng_id = #{params.bingzhengId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.bingzhengCollectionTypes != null and params.bingzhengCollectionTypes != ''">
+                and a.bingzheng_collection_types = #{params.bingzhengCollectionTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断常见病症的id不为空 -->
+            <if test=" params.bingzhengIdNotNull != '' and params.bingzhengIdNotNull != null and params.bingzhengIdNotNull != 'null' ">
+                and a.bingzheng_id IS NOT NULL
+            </if>
+            <if test=" params.bingzhengName != '' and params.bingzhengName != null and params.bingzhengName != 'null' ">
+                and bingzheng.bingzheng_name like CONCAT('%',#{params.bingzhengName},'%')
+            </if>
+            <if test=" params.bingzhengUuidNumber != '' and params.bingzhengUuidNumber != null and params.bingzhengUuidNumber != 'null' ">
+                and bingzheng.bingzheng_uuid_number like CONCAT('%',#{params.bingzhengUuidNumber},'%')
+            </if>
+            <if test="params.bingzhengTypes != null  and params.bingzhengTypes != ''">
+                and bingzheng.bingzheng_types = #{params.bingzhengTypes}
+            </if>
+
+            <if test=" params.bingzhengZhengzhuang != '' and params.bingzhengZhengzhuang != null and params.bingzhengZhengzhuang != 'null' ">
+                and bingzheng.bingzheng_zhengzhuang like CONCAT('%',#{params.bingzhengZhengzhuang},'%')
+            </if>
+            <if test=" params.bingzhengContent != '' and params.bingzhengContent != null and params.bingzhengContent != 'null' ">
+                and bingzheng.bingzheng_content like CONCAT('%',#{params.bingzhengContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and bingzheng.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test="params.bingzhengDeleteStart != null  and params.bingzhengDeleteStart != '' ">
+                <![CDATA[  and bingzheng.bingzheng_delete >= #{params.bingzhengDeleteStart}   ]]>
+            </if>
+            <if test="params.bingzhengDeleteEnd != null  and params.bingzhengDeleteEnd != '' ">
+                <![CDATA[  and bingzheng.bingzheng_delete <= #{params.bingzhengDeleteEnd}   ]]>
+            </if>
+            <if test="params.bingzhengDelete != null  and params.bingzhengDelete != '' ">
+                and bingzheng.bingzheng_delete = #{params.bingzhengDelete}
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuUuidNumber != '' and params.yonghuUuidNumber != null and params.yonghuUuidNumber != 'null' ">
+                and yonghu.yonghu_uuid_number like CONCAT('%',#{params.yonghuUuidNumber},'%')
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(yonghu.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(yonghu.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
